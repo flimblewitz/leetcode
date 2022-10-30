@@ -10,18 +10,24 @@ fn main() {
 struct Solution {}
 impl Solution {
     pub fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>> {
-        let nums = nums.cloned();
+        let mut nums = nums.clone();
         nums.sort();
-        let index_of_first_positive = nums
+        let index_of_first_non_negative_or_last_index = nums
             .iter()
-            .skip(1)
             .enumerate()
-            .find_map(|(index, val)| nums[index - 1] <= 0 && val > 0)
-            .unwrap();
+            .find(|(_, val)| **val >= 0)
+            .unwrap_or((nums.len() - 1, &0))
+            .0;
         let mut tuple_set = std::collections::HashSet::new();
         for i in 0..(nums.len() - 2) {
+            if nums[i] > 0 {
+                break;
+            }
             for j in (i + 1)..(nums.len() - 1) {
-                for k in (j + 1)..(nums.len()) {
+                for k in (j + 1).max(index_of_first_non_negative_or_last_index)..(nums.len()) {
+                    if nums[k] < 0 {
+                        continue;
+                    }
                     if nums[i] + nums[j] + nums[k] == 0 {
                         let mut v = vec![nums[i], nums[j], nums[k]];
                         v.sort();
