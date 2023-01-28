@@ -23,9 +23,37 @@ struct Solution;
 
 */
 
-// this is crude, but whatever. It let me remind myself that you can match on slices and you have to index them with ranges instead of usizes (you can't fetch a single item from a slice, you can only get a subslice)
 impl Solution {
     pub fn roman_to_int(s: String) -> i32 {
+        s.chars()
+            .rev()
+            .fold(
+                (0_i32, 1_i32),
+                |(mut sum, mut biggest_observed_digit), c| {
+                    let roman_digit = match c {
+                        'I' => 1,
+                        'V' => 5,
+                        'X' => 10,
+                        'L' => 50,
+                        'C' => 100,
+                        'D' => 500,
+                        'M' => 1000,
+                        _ => panic!("unrecognized char {c}"),
+                    };
+                    if biggest_observed_digit > roman_digit {
+                        sum -= roman_digit;
+                    } else {
+                        biggest_observed_digit = roman_digit;
+                        sum += roman_digit;
+                    };
+                    (sum, biggest_observed_digit)
+                },
+            )
+            .0
+    }
+
+    // this is crude, but whatever. It let me remind myself that you can match on slices and you have to index them with ranges instead of usizes (you can't fetch a single item from a slice, you can only get a subslice)
+    pub fn _naive(s: String) -> i32 {
         let mut acc = 0;
 
         let mut i = 0;
