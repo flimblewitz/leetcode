@@ -1,10 +1,14 @@
 fn main() {
-    println!("{:?}", Solution::search_range(vec![5, 7, 8, 8, 10], 8));
-    println!("{:?}", Solution::search_range(vec![5, 7, 7, 8, 8, 10], 8));
-    println!("{:?}", Solution::search_range(vec![5, 7, 7, 8, 8, 10], 7));
-    println!("{:?}", Solution::search_range(vec![5, 7, 7, 8, 8, 10], 6));
-    println!("{:?}", Solution::search_range(vec![], 0));
-    println!("{:?}", Solution::search_range(vec![2, 2], 2));
+    assert_eq!(
+        Solution::search_range(vec![5, 7, 7, 8, 8, 10], 8),
+        vec![3, 4]
+    );
+    assert_eq!(
+        Solution::search_range(vec![5, 7, 7, 8, 8, 10], 6),
+        vec![-1, -1]
+    );
+    assert_eq!(Solution::search_range(vec![], 0), vec![-1, -1]);
+    assert_eq!(Solution::search_range(vec![2, 2], 2), vec![0, 1]);
 }
 
 struct Solution;
@@ -15,45 +19,39 @@ impl Solution {
             return vec![-1, -1];
         }
 
-        let mut left = 0;
-        let mut right = nums.len() - 1;
-        while left < right {
+        // let's find the first occurrence
+        let mut l = 0;
+        let mut r = nums.len() - 1;
+        while l < r {
             // println!("{left}, {right}");
-            let middle = (right + left) / 2;
-            if nums[middle] >= target {
-                right = middle;
+            let m = (r + l) / 2;
+            if target <= nums[m] {
+                r = m;
             } else {
-                left = middle + 1;
+                l = m + 1;
             }
         }
-        let first = if nums[right] == target {
-            right as i32
-        } else {
-            -1
-        };
+        let first = if nums[r] == target { r as i32 } else { -1 };
 
-        let mut left = 0;
-        let mut right = nums.len() - 1;
-        while left < right {
+        // and now for the last occurrence
+        let mut l = 0;
+        let mut r = nums.len() - 1;
+        while l < r {
             // println!("{left}, {right}");
-            let middle = (right + left) / 2;
-            if nums[middle] > target {
-                right = middle;
+            let m = (r + l) / 2;
+            // let's try setting r to the first index with a value greater than the target
+            if target >= nums[m] {
+                l = m + 1;
             } else {
-                if middle + 1 < nums.len() && nums[middle + 1] <= target {
-                    left = middle + 1
-                } else if left == middle {
-                    right = middle;
-                } else {
-                    left = middle;
-                }
+                r = m;
             }
         }
-        let last = if nums[right] == target {
-            right as i32
-        } else {
-            -1
-        };
+        // so we know that r is either the last index (and the last occurrence of the target), or it's the smallest number that's still larger than the target
+        // if it's larger than the target and there's at least one preceding index, let's bump it down one because that might be our answer
+        if target < nums[r] && r > 0 {
+            r -= 1;
+        }
+        let last = if nums[r] == target { r as i32 } else { -1 };
 
         vec![first, last]
     }
